@@ -38,6 +38,10 @@ change, with this file updated in the same commit.
   decision needs them.
 - Filters sit in the sidebar and apply to the whole screen. Their defaults
   show the most recent complete period.
+- The cover page, where the app opens, is the exception to the rules above:
+  it shows the database's name and the stakeholder brief, word for word, and
+  needs no takeaway, headline numbers, or filters. How it looks is the
+  team's, from Make it yours.
 
 ### Choosing a chart
 
