@@ -39,6 +39,16 @@ from sqlalchemy.engine import URL
 CONNECTION_NAME = "db"
 SECRETS_PATH = Path(".streamlit/secrets.toml")
 
+# The example file's password. A wrong password counts toward the server's
+# lockout, and a classroom shares one address, so the placeholder is refused
+# here and never sent.
+PASSWORD_PLACEHOLDER = "PASTE-THE-CLASS-PASSWORD-HERE"
+PASSWORD_MISSING = (
+    "The password in .streamlit/secrets.toml is still the placeholder: "
+    "paste the student password into it (on Community Cloud, into the "
+    "app's Secrets box) and save."
+)
+
 ENGINE_OPTIONS = {
     "pool_pre_ping": True,
     "pool_recycle": 1500,
@@ -64,6 +74,10 @@ def get_connection():
     """
     import streamlit as st
 
+    settings = st.secrets.get("connections", {}).get(CONNECTION_NAME, {})
+    if settings.get("password") == PASSWORD_PLACEHOLDER:
+        st.error(PASSWORD_MISSING)
+        st.stop()
     return st.connection(
         CONNECTION_NAME, type="sql", connect_args=connect_args(), **ENGINE_OPTIONS
     )
@@ -83,6 +97,8 @@ def engine_from_secrets(path: Path = SECRETS_PATH) -> sqlalchemy.Engine:
             ".streamlit/secrets.toml and fill in the password."
         )
     settings = tomllib.loads(path.read_text())["connections"][CONNECTION_NAME]
+    if settings.get("password") == PASSWORD_PLACEHOLDER:
+        raise ValueError(PASSWORD_MISSING)
     url = URL.create(
         drivername=f"{settings['dialect']}+{settings['driver']}",
         username=settings["username"],
